@@ -35,7 +35,7 @@
     
     UIAlertController *photoActionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
-    UIAlertAction *cameraRollAction = [UIAlertAction actionWithTitle:@"From Camera Roll" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertAction *cameraRollAction = [UIAlertAction actionWithTitle:@"From Library" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         imagePicker.sourceType =  UIImagePickerControllerSourceTypePhotoLibrary;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }];
@@ -43,7 +43,7 @@
     
     UIAlertAction *takePictureAction = [UIAlertAction actionWithTitle:@"Take Picture" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         if ([UIImagePickerController isSourceTypeAvailable:
-             UIImagePickerControllerSourceTypeCamera] == YES){
+             UIImagePickerControllerSourceTypeCamera] == YES) {
             
             imagePicker.sourceType =  UIImagePickerControllerSourceTypeCamera;
             imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
@@ -51,9 +51,16 @@
             
             [self presentViewController:imagePicker animated:YES completion:nil];
             
-        } else{
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Camera Not Available on Device" message:@"This device does not have a camera option. Please choose Photo Library" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-            [alert show];
+        } else {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Camera Not Available on Device" message:@"This device does not have a camera option. Please choose photo from library." preferredStyle:UIAlertControllerStyleAlert];
+            
+            UIAlertAction *dismissAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }];
+            
+            [alert addAction:dismissAction];
+            
+            [self presentViewController:alert animated:YES completion:nil];
         }
     }];
     [photoActionSheet addAction:takePictureAction];
