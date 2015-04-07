@@ -3,17 +3,13 @@
 //  PhotoCaptureSample
 //
 //  Created by Caleb Hicks on 11/14/14.
-//  Copyright (c) 2014 DevMountain. All rights reserved.
+//  Edited by Taylor Mott on 4/7/14.
+//  Copyright (c) 2015 DevMountain. All rights reserved.
 //
 
 #import "ViewController.h"
 
-typedef NS_ENUM(NSInteger, ActionSheetButton){
-    ActionSheetFromLibrary,
-    ActionSheetTakePicture
-};
-
-@interface ViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate>
+@interface ViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 
@@ -34,45 +30,35 @@ typedef NS_ENUM(NSInteger, ActionSheetButton){
 }
 
 - (IBAction)photoButton:(id)sender {
-    UIActionSheet *profileActionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"From Camera Roll", @"Take Picture", nil];
-    
-    [profileActionSheet showInView:self.view];
-}
-
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-    
-    ActionSheetButton button = buttonIndex;
-    
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
     
-    NSLog(@"%ld", (long)buttonIndex);
+    UIAlertController *photoActionSheet = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
-    switch (button) {
+    UIAlertAction *cameraRollAction = [UIAlertAction actionWithTitle:@"From Camera Roll" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        imagePicker.sourceType =  UIImagePickerControllerSourceTypePhotoLibrary;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+    [photoActionSheet addAction:cameraRollAction];
+    
+    UIAlertAction *takePictureAction = [UIAlertAction actionWithTitle:@"Take Picture" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        if ([UIImagePickerController isSourceTypeAvailable:
+             UIImagePickerControllerSourceTypeCamera] == YES){
             
-        case ActionSheetFromLibrary:{
-            imagePicker.sourceType =  UIImagePickerControllerSourceTypePhotoLibrary;
+            imagePicker.sourceType =  UIImagePickerControllerSourceTypeCamera;
+            imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
+            imagePicker.allowsEditing = YES;
+            
             [self presentViewController:imagePicker animated:YES completion:nil];
-            break;
-        }
             
-        case ActionSheetTakePicture:{
-            if ([UIImagePickerController isSourceTypeAvailable:
-                 UIImagePickerControllerSourceTypeCamera] == YES){
-                
-                imagePicker.sourceType =  UIImagePickerControllerSourceTypeCamera;
-                imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
-                imagePicker.allowsEditing = YES;
-                
-                [self presentViewController:imagePicker animated:YES completion:nil];
-                
-            } else{
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Camera Not Available on Device" message:@"This device does not have a camera option. Please choose Photo Library" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-                [alert show];
-            }
-            break;
+        } else{
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Camera Not Available on Device" message:@"This device does not have a camera option. Please choose Photo Library" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+            [alert show];
         }
-    }
+    }];
+    [photoActionSheet addAction:takePictureAction];
+    
+    [self presentViewController:photoActionSheet animated:YES completion:nil];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
